@@ -81,8 +81,11 @@ class Talker(Node):
             joint_state_send.header.stamp = self.get_clock().now().to_msg()
             try:
                 # Get robot joint angles
-                angles = self.ua.get_angles_info()
-                time.sleep(0.1)
+                for i in range(3):
+                    angles = self.ua.get_angles_info()
+                    time.sleep(0.1)
+                    if angles != -1:
+                        break
                 if isinstance(angles, list) and len(angles) > 0:
                     angles[2] -= 90
                     # Convert angles to radians for ROS2
@@ -90,13 +93,18 @@ class Talker(Node):
                     joint_state_send.position = data_list
                     pub.publish(joint_state_send)
                 else:
-                    self.get_logger().warn("Failed to get valid angles: {}".format(angles))
+                    # self.get_logger().warn("Failed to get valid angles: {}".format(angles))
+                    continue
 
                 # Get robot coordinates
-                coords = self.ua.get_coords_info()
+                for i in range(3):
+                    coords = self.ua.get_coords_info()
+                    if coords != -1:
+                        break
                 if not isinstance(coords, list) or len(coords) == 0 or coords == -1:
-                    self.get_logger().warn("Failed to get valid coordinates: {}".format(coords))
-                    coords = [0, 0, 0, 0]  # fallback
+                    # self.get_logger().warn("Failed to get valid coordinates: {}".format(coords))
+                    continue
+                    # coords = [0, 0, 0, 0]  # fallback
 
                 # Configure marker
                 marker_.header.stamp = self.get_clock().now().to_msg()

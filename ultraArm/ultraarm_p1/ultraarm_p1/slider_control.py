@@ -65,7 +65,7 @@ class Slider_Subscriber(Node):
         joint4 = data_list[-1]
         angles_list = [joint1, joint2, joint3, joint4]
         self.get_logger().info('joint_angles: {}'.format(angles_list))
-        self.ua.set_angles(angles_list, 2500, _async=False)
+        self.ua.set_angles(angles_list, 2800, _async=False)
 
 
 def main(args=None):

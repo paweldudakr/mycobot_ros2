@@ -52,10 +52,20 @@ def generate_launch_description():
     joint_state_publisher_gui_node = Node(
         package='joint_state_publisher_gui',
         executable='joint_state_publisher_gui',
-        condition=IfCondition(LaunchConfiguration('gui'))
+        condition=IfCondition(LaunchConfiguration('gui')),
+        remappings=[
+            ('/joint_states', '/joint_states_raw')
+        ]
     )
     res.append(joint_state_publisher_gui_node)
 
+    joint_coupling_node = Node(
+        package='ultraarm_p1', 
+        executable='joint_coupling_node',
+        output='screen'
+    )
+    res.append(joint_coupling_node)
+    
     rviz_node = Node(
         name="rviz2",
         package="rviz2",

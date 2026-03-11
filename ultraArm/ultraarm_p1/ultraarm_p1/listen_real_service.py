@@ -101,7 +101,10 @@ class MyCobotDriver(Node):
         """Publish current joint states to the `joint_states` topic."""
         try:
             lock = acquire('/tmp/mycobot_lock')
-            angles = self.ua.get_angles_info()
+            for i in range(3):
+                angles = self.ua.get_angles_info()
+                if angles != -1:
+                    break
             release(lock)
             time.sleep(0.1)
             # self.get_logger().info(f"Raw angles from MyCobot: {angles}")
@@ -196,7 +199,10 @@ class MyCobotDriver(Node):
         """
         try:
             lock = acquire('/tmp/mycobot_lock')
-            coords = self.ua.get_coords_info()
+            for i in range(3):
+                coords = self.ua.get_coords_info()
+                if coords != -1:
+                    break
             release(lock)
             time.sleep(0.1)
             if coords and all(c != -1 for c in coords) and len(coords) == 4:
@@ -221,7 +227,11 @@ class MyCobotDriver(Node):
         """
         try:
             lock = acquire('/tmp/mycobot_lock')
-            angles = self.ua.get_angles_info()
+            for i in range(3):
+                angles = self.ua.get_angles_info()
+                # self.get_logger().info(f'angles:{angles}')
+                if angles != -1:
+                    break
             release(lock)
             time.sleep(0.1)
             if angles and all(a != -1 for a in angles) and len(angles) == 4:
