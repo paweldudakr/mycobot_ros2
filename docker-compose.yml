@@ -1,0 +1,20 @@
+services:
+  mycobot:
+    build: .
+    image: mycobot_ros2:humble
+    container_name: mycobot_ros2_humble
+    network_mode: host
+    environment:
+      - DISPLAY=${DISPLAY:-host.docker.internal:0.0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority:ro
+      - .:/ros2_ws/src/mycobot_ros2
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stdin_open: true
+    tty: true
+    privileged: true
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0" # Uncomment after attaching via usbipd

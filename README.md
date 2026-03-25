@@ -20,17 +20,47 @@ myCobot ROS2 package
 
 ## Installation
 
-### 1.1 Pre-Requriements
+### 1.0 Docker Installation (Recommended)
 
-For using this package, the [Python api](https://github.com/elephantrobotics/pymycobot) library should be installed first.
+This is the easiest way to get `mycobot_ros2` running without environmental issues (especially on Windows/WSL). It packages ROS 2 Humble and all dependencies into a single container.
+
+#### 1.0.1 Prerequisites
+- **Docker Desktop** (enabled for WSL2).
+- **X-Server** (for GUI/RViz): Install [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
+
+#### 1.0.2 Build and Run
+1. Open a terminal in this directory and build the image:
+   ```powershell
+   docker compose build
+   ```
+2. Start the container:
+   ```powershell
+   docker compose up -d
+   ```
+3. Enter the container:
+   ```powershell
+   docker compose exec mycobot bash
+   ```
+4. Run a launch command:
+   ```bash
+   ros2 launch mycobot_280 slider_control.launch.py
+   ```
+
+#### 1.0.3 Troubleshooting & Hardware
+- **GUI not showing**: Ensure VcXsrv is running with "No Access Control" checked.
+- **Serial Port not found**: Use `usbipd-win` to attach your MyCobot to WSL. Follow the steps in the provided `docker-compose.yml` comments.
+
+---
+
+### 1.1 Pre-Requirements (Manual Install)
+
+For using this package manually, the [Python api](https://github.com/elephantrobotics/pymycobot) library should be installed first.
 
 ```bash
 pip install pymycobot --user
 ```
 
-### 1.2 Package Download and Install
-
-Install ros package in your src folder of your Colcon workspace.
+### 1.2 Package Download and Install (Manual Install)
 
 ```bash
 $ cd ~/colcon_ws/src
