@@ -85,6 +85,16 @@ $ sudo echo 'source ~/colcon_ws/install/setup.bash' >> ~/.bashrc
    from here: https://github.com/ros/joint_state_publisher/blob/ros2/joint_state_publisher_gui/joint_state_publisher_gui/joint_state_publisher_gui.py
 
 
+## Test
+
+```bash
+# Start the robot and GUI (from inside Docker)
+ros2 launch mycobot_280 slider_control.launch.py
+
+# Sample stir script
+python3 /ros2_ws/src/mycobot_ros2/DudaRobotics/stir.py
+```
+
 ## URDF Model Graph
 
 [mycobot 280 m5](./mycobot_description/urdf/mycobot_280_m5/mycobot_280_m5.urdf)
