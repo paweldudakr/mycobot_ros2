@@ -1,19 +1,32 @@
 import time
 import math
 import datetime
-from pymycobot import MyCobot280
-
-# Connection: USB serial is reliable for both read and write.
-# WiFi (MyCobot280Socket) is write-only and conflicts when USB is also connected.
-SERIAL_PORT = '/dev/ttyUSB0'
-BAUD_RATE = 115200
+import argparse
 
 def log(msg):
     print(f"{datetime.datetime.now()} {msg}")
 
-log("Connecting via USB serial...")
-mc = MyCobot280(SERIAL_PORT, BAUD_RATE)
-time.sleep(0.5)
+# --- Connection mode ---
+# USB serial: reliable for both read and write (default)
+# WiFi: requires M5Stack to be in WLAN Server mode (set via M5Stack screen).
+#   WiFi is write-only (no readback). Use --wifi flag.
+parser = argparse.ArgumentParser(description='MyCobot 280 stirring script')
+parser.add_argument('--wifi', action='store_true',
+                    help='Use WiFi instead of USB serial (M5Stack must be in WLAN Server mode)')
+parser.add_argument('--ip', default='192.168.6.57', help='Robot WiFi IP (default: 192.168.6.57)')
+parser.add_argument('--port', type=int, default=9000, help='Robot WiFi port (default: 9000)')
+parser.add_argument('--serial', default='/dev/ttyUSB0', help='USB serial port (default: /dev/ttyUSB0)')
+args = parser.parse_args()
+
+if args.wifi:
+    from mycobot_wifi import MyCobotWiFi
+    log(f"Connecting via WiFi ({args.ip}:{args.port})...")
+    mc = MyCobotWiFi(args.ip, args.port)
+else:
+    from pymycobot import MyCobot280
+    log(f"Connecting via USB serial ({args.serial})...")
+    mc = MyCobot280(args.serial, 115200)
+    time.sleep(0.5)
 
 # 2. Settings for the "Stir"
 # You might need to adjust these coordinates based on where your glass is!
