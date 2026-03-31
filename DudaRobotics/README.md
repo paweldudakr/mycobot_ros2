@@ -55,6 +55,12 @@ If the LED changes colors and the robot moves, WiFi is working.
 docker compose exec mycobot python3 /ros2_ws/src/mycobot_ros2/DudaRobotics/stir.py --wifi
 ```
 
+Launch slider control over WiFi:
+
+```bash
+docker compose exec mycobot bash -lc "source /ros2_ws/install/setup.bash && ros2 launch mycobot_280 slider_control.launch.py connection_type:=wifi ip:=192.168.6.57 tcp_port:=9000"
+```
+
 Optional arguments:
 - `--ip 192.168.6.57` — Robot IP address (default: `192.168.6.57`)
 - `--port 9000` — TCP port (default: `9000`)

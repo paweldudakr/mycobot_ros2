@@ -1,9 +1,10 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-import os
 import time
 import math
+import socket
+import struct
 import pymycobot
 from packaging import version
 
@@ -18,6 +19,50 @@ if version.parse(current_verison) < version.parse(MIN_REQUIRE_VERSION):
 else:
     print('pymycobot library version meets the requirements!')
     from pymycobot import MyCobot280
+
+
+class MyCobot280WiFi:
+    def __init__(self, ip, tcp_port, connect_delay=1.5):
+        self.ip = ip
+        self.tcp_port = tcp_port
+        self.connect_delay = connect_delay
+        self.sock = None
+        self._connect()
+
+    def _connect(self):
+        if self.sock is not None:
+            try:
+                self.sock.close()
+            except OSError:
+                pass
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(5)
+        self.sock.connect((self.ip, self.tcp_port))
+        time.sleep(self.connect_delay)
+
+    def _build_send_angles_command(self, angles, speed):
+        payload = []
+        for angle in angles:
+            payload.extend(struct.pack('>h', int(angle * 100)))
+        payload.append(speed)
+        length = len(payload) + 2
+        return bytes([0xFE, 0xFE, length, 0x22] + payload + [0xFA])
+
+    def send_angles(self, angles, speed):
+        command = self._build_send_angles_command(angles, speed)
+        try:
+            self.sock.sendall(command)
+        except OSError:
+            self._connect()
+            self.sock.sendall(command)
+
+    def close(self):
+        if self.sock is not None:
+            try:
+                self.sock.close()
+            except OSError:
+                pass
+            self.sock = None
 
 
 class Slider_Subscriber(Node):
@@ -37,15 +82,29 @@ class Slider_Subscriber(Node):
         #     port = self.robot_m5
         # else:
         #     port = self.robot_wio
+        self.declare_parameter('connection_type', 'serial')
         self.declare_parameter('port', '/dev/ttyUSB0')
         self.declare_parameter('baud', 115200)
+        self.declare_parameter('ip', '192.168.6.57')
+        self.declare_parameter('tcp_port', 9000)
+        connection_type = self.get_parameter('connection_type').get_parameter_value().string_value
         port = self.get_parameter('port').get_parameter_value().string_value
         baud = self.get_parameter('baud').get_parameter_value().integer_value
-        self.get_logger().info("port:%s, baud:%d" % (port, baud))
-        self.mc = MyCobot280(port, 115200)
-        time.sleep(0.05)
-        self.mc.set_fresh_mode(1)
-        time.sleep(0.05)
+        ip = self.get_parameter('ip').get_parameter_value().string_value
+        tcp_port = self.get_parameter('tcp_port').get_parameter_value().integer_value
+
+        self.get_logger().info(
+            "connection_type:%s, port:%s, baud:%d, ip:%s, tcp_port:%d"
+            % (connection_type, port, baud, ip, tcp_port)
+        )
+
+        if connection_type == 'wifi':
+            self.mc = MyCobot280WiFi(ip, tcp_port)
+        else:
+            self.mc = MyCobot280(port, baud)
+            time.sleep(0.05)
+            self.mc.set_fresh_mode(1)
+            time.sleep(0.05)
 
     def listener_callback(self, msg):
 
@@ -64,6 +123,7 @@ def main(args=None):
 
     rclpy.spin(slider_subscriber)
 
+    slider_subscriber.mc.close()
     slider_subscriber.destroy_node()
     rclpy.shutdown()
 

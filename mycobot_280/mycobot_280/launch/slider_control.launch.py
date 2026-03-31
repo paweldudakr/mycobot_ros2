@@ -50,6 +50,27 @@ def generate_launch_description():
     )
     res.append(baud_rate_arg)
 
+    connection_type_arg = DeclareLaunchArgument(
+        'connection_type',
+        default_value='serial',
+        description='Connection type: serial or wifi'
+    )
+    res.append(connection_type_arg)
+
+    ip_arg = DeclareLaunchArgument(
+        'ip',
+        default_value='192.168.6.57',
+        description='Robot IP address for WiFi mode'
+    )
+    res.append(ip_arg)
+
+    tcp_port_arg = DeclareLaunchArgument(
+        'tcp_port',
+        default_value='9000',
+        description='Robot TCP port for WiFi mode'
+    )
+    res.append(tcp_port_arg)
+
     robot_description = ParameterValue(Command(['xacro ', LaunchConfiguration('model')]),
                                        value_type=str)
 
@@ -81,8 +102,11 @@ def generate_launch_description():
         package="mycobot_280",
         executable="slider_control",
         parameters=[
+            {'connection_type': LaunchConfiguration('connection_type')},
             {'port': LaunchConfiguration('port')},
-            {'baud': LaunchConfiguration('baud')}
+            {'baud': LaunchConfiguration('baud')},
+            {'ip': LaunchConfiguration('ip')},
+            {'tcp_port': LaunchConfiguration('tcp_port')}
         ],
         name="slider_control",
         output="screen"
